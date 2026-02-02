@@ -1,16 +1,18 @@
 import requests
 from bs4 import BeautifulSoup
+# from ics import Calendar
+from icalendar import Calendar
 
 class Event():
-    def __init__(self, source_url, source_type, poster="", title="", start="", end="", building="", url=""):
+    def __init__(self, source_url, source_type, poster=None, title=None, start=None, end=None, building=None, url=None):
         self.source_url: str = source_url
         self.source_type: str = source_type
-        self.poster: str = poster
-        self.title: str = title
-        self.start: str = start
-        self.end: str = end
-        self.building: str = building
-        self.url: str = url
+        self.poster = poster
+        self.title = title
+        self.start = start
+        self.end = end
+        self.building = building
+        self.url = url
 
     def set_poster(self, poster):
         self.poster = poster
@@ -44,9 +46,12 @@ class Checker():
         self.events: list = []
     
     def get_soup(self, features="html.parser"):
-        r = requests.get(self.source_url)
+        r = self.get_request()
         soup = BeautifulSoup(r.text, features=features)
         return soup
+
+    def get_request(self):
+        return requests.get(self.source_url)
     
     def find_class(self, soup, check):
         if soup.find(class_=check):
@@ -96,12 +101,12 @@ class RSSChecker(Checker):
         soup = self.get_soup(features="xml")
         items = self.find_all(soup, 'item')
         for item in items:
-            poster = self.find(item, "dc:creator").get_text(strip=True) if self.find(item, "dc:creator") is not None else ""
-            title = self.find(item, "title").get_text() if self.find(item, "title") is not None else ""
-            start = self.find(item, "pubDate").get_text() if self.find(item, "pubDate") is not None else ""
-            end = self.find(item, "livewhale:ends").get_text() if self.find(item, "livewhale:ends") is not None else ""
-            building = self.find(item, "georss:featurename").get_text(strip=True) if self.find(item, "georss:featurename") is not None else ""
-            url = self.find(item, "link").get_text() if self.find(item, "link") is not None else ""
+            poster = self.find(item, "dc:creator").get_text(strip=True) if self.find(item, "dc:creator") is not None else None
+            title = self.find(item, "title").get_text() if self.find(item, "title") is not None else None
+            start = self.find(item, "pubDate").get_text() if self.find(item, "pubDate") is not None else None
+            end = self.find(item, "livewhale:ends").get_text() if self.find(item, "livewhale:ends") is not None else None
+            building = self.find(item, "georss:featurename").get_text(strip=True) if self.find(item, "georss:featurename") is not None else None
+            url = self.find(item, "link").get_text() if self.find(item, "link") is not None else None
             
             self.events.append(Event(
                 self.source_url, 
@@ -117,39 +122,58 @@ class RSSChecker(Checker):
     def get_events(self):
         return self.events
 
-# class ICSChecker(Checker):
-#     def __init__(self, source_url, source_type):
-#         super().__init__(source_url, source_type)
+class ICSChecker(Checker):
+    def __init__(self, source_url, source_type):
+        super().__init__(source_url, source_type)
+    
+    def check(self):
+        r = self.get_request()
+        cal = Calendar.from_ical(r.text)
+        with open("test1.txt", "wb") as f:
+            f.write(cal.to_ical())
+        for event in cal.walk("VEVENT"):
+            poster = event.get("ORGANIZER")
 
-# def create_rss_events_list(items):
-#     events = []
-#     for item in items:
-#         try:
-#             title = item.title.text
-#         except:
-#             title = None
+            poster = str(poster).strip() if poster is not None else None
 
-#         try:
-#             date = item.pubDate.text
-#         except:
-#             date = None
-        
-#         try:
-#             link = item.link.text
-#         except:
-#             link = None
-#         events.append(database_format("",title,date,"","",link))
-#     return events
+            title = event.get("SUMMARY")
+            title = str(title).strip() if title is not None else None
 
-rss = RSSChecker("https://financialaid.ucmerced.edu/rss.xml", "rss")
-rss.check()
-events = rss.get_events()
-for event in events:
-    print(f"{event.poster}, {event.title}, {event.start}, {event.end}, {event.building}, {event.url}")
+            start = event.get("DTSTART")
+            start = start.dt.isoformat() if start else None
 
-# calendar = CalendarChecker("https://spanish.ucmerced.edu/events", "calendar")
-# calendar.check()
-# events = calendar.get_events()
-# print(len(events))
-# for event in events:
-#     print(f"{event.title}, {event.start}, {event.url}")
+            end = event.get("DTEND")
+            end = end.dt.isoformat() if end else None
+
+            building = event.get("LOCATION")
+            building = str(building).strip() if building is not None else None
+
+            url = event.get("URL")
+            url = str(url).strip() if url is not None else None
+
+            self.events.append(Event(
+                source_url=self.source_url,
+                source_type=self.source_type,
+                poster=poster,
+                title=title,
+                start=start,
+                end=end,
+                building=building,
+                url=url
+            ))
+
+    def get_events(self):
+        return self.events
+
+calendar = ICSChecker("https://calendar.google.com/calendar/ical/k5ap91ke2o77bs6uio2fc3l2ss%40group.calendar.google.com/public/basic.ics", "ics")
+calendar.check()
+events = calendar.get_events()
+for event in events[:10]:
+    output = ""
+    output += f"{event.poster}, " if event.poster is not None else ""
+    output += f"{event.title}, " if event.title is not None else ""
+    output += f"{event.start}, " if event.start is not None else ""
+    output += f"{event.end}, " if event.end is not None else ""
+    output += f"{event.building}, " if event.building is not None else ""
+    output += f"{event.url}, " if event.url is not None else ""
+    print(output)
