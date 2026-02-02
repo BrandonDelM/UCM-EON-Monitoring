@@ -45,50 +45,34 @@ class Checker():
         self.source_type: str = source_type
         self.events: list = []
     
-    def get_soup(self, features="html.parser"):
-        r = self.get_request()
+    def get_soup(self, url=None, features="html.parser"):
+        if url is None:
+            url = self.source_url
+        r = self.get_request(url)
         soup = BeautifulSoup(r.text, features=features)
         return soup
 
-    def get_request(self):
-        return requests.get(self.source_url)
-    
-    def find_class(self, soup, check):
-        if soup.find(class_=check):
-            return soup.find(class_=check)
-        return None
-
-    def find(self, soup, check):
-        if soup.find(check):
-            return soup.find(check)
-        return None
-        
-    def find_all(self, soup, check):
-        if soup.find_all(check):
-            return soup.find_all(check)
-        return None
-
-    def find_all_class(self, soup, check):
-        if soup.find_all(class_=check):
-            return soup.find_all(class_=check)
-        return None
+    def get_request(self, url=None):
+        if url is None:
+            url = self.source_url
+        return requests.get(url)
 
 class CalendarChecker(Checker):
-    def __init__(self, source_url, source_type):
-        super().__init__(source_url, source_type)
+    def __init__(self, source_url):
+        super().__init__(source_url, "calendar")
 
     def check(self):
         soup = self.get_soup()
 
         page_url = self.source_url[:self.source_url.rfind("/")]
 
-        calendar = self.find_class(soup, "fullcalendar-content")
+        calendar = soup.find(class_="fullcalendar-content")
         if calendar is None:
             print(f"{calendar} is None")
             return
-        titles = self.find_all(calendar, 'h3')
-        dates = self.find_all(calendar, 'a')
-        urls = [f"{page_url}{a_element.get('href')}" for a_element in self.find_all(calendar, "a") if a_element.get('href')]
+        titles = calendar.find_all('h3')
+        dates = calendar.find_all('a')
+        urls = [f"{page_url}{a_element.get('href')}" for a_element in calendar.find_all("a") if a_element.get('href')]
         print(len(titles))
 
         for title, date, url in zip(titles, dates, urls):
@@ -99,19 +83,19 @@ class CalendarChecker(Checker):
         return self.events
 
 class RSSChecker(Checker):
-    def __init__(self, source_url, source_type):
-        super().__init__(source_url, source_type)
+    def __init__(self, source_url):
+        super().__init__(source_url, "rss")
     
     def check(self):
         soup = self.get_soup(features="xml")
-        items = self.find_all(soup, 'item')
+        items = soup.find_all('item')
         for item in items:
-            poster = self.find(item, "dc:creator").get_text(strip=True) if self.find(item, "dc:creator") is not None else None
-            title = self.find(item, "title").get_text() if self.find(item, "title") is not None else None
-            start = self.find(item, "pubDate").get_text() if self.find(item, "pubDate") is not None else None
-            end = self.find(item, "livewhale:ends").get_text() if self.find(item, "livewhale:ends") is not None else None
-            building = self.find(item, "georss:featurename").get_text(strip=True) if self.find(item, "georss:featurename") is not None else None
-            url = self.find(item, "link").get_text() if self.find(item, "link") is not None else None
+            poster = item.find("dc:creator").get_text(strip=True) if item.find("dc:creator") is not None else None
+            title = item.find("title").get_text() if item.find("title") is not None else None
+            start = item.find("pubDate").get_text() if item.find("pubDate") is not None else None
+            end = item.find("livewhale:ends").get_text() if item.find("livewhale:ends") is not None else None
+            building = item.find("georss:featurename").get_text(strip=True) if item.find("georss:featurename") is not None else None
+            url = item.find("link").get_text() if item.find("link") is not None else None
             
             self.events.append(Event(
                 self.source_url, 
@@ -128,14 +112,12 @@ class RSSChecker(Checker):
         return self.events
 
 class ICSChecker(Checker):
-    def __init__(self, source_url, source_type):
-        super().__init__(source_url, source_type)
+    def __init__(self, source_url):
+        super().__init__(source_url, "ics")
     
     def check(self):
         r = self.get_request()
         cal = Calendar.from_ical(r.text)
-        with open("test3.txt", "wb") as f:
-            f.write(cal.to_ical())
         for event in cal.walk("VEVENT"):
             poster = event.get("ORGANIZER")
 
@@ -171,18 +153,18 @@ class ICSChecker(Checker):
         return self.events
 
 class NewsChecker(Checker):
-    def __init__(self, source_url, source_type):
-        super().__init__(source_url, source_type)
+    def __init__(self, source_url):
+        super().__init__(source_url, "news")
     
     def check(self):
         soup = self.get_soup("html.parser")
         page_url = self.source_url[:self.source_url.rfind("/")]
-        contents = self.find_class(soup, "view-content")
-        events = self.find_all_class(contents, "views-row")
+        contents = soup.find(class_="view-content")
+        events = contents.find_all(class_="views-row")
         for event in events[:1]:
-            title = self.find(event, "a").get_text(strip=True) if self.find(event, "a") is not None else None
-            start = self.find_class(event, "date-display-single").get("content") if self.find_class(event, "date-display-single") is not None else None
-            url = self.find(event, "a").get("href") if self.find(event, "a") is not None else None
+            title = event.find("a").get_text(strip=True) if event.find("a") is not None else None
+            start = event.find_class("date-display-single").get("content") if event.find_class("date-display-single") is not None else None
+            url = event.find("a").get("href") if event.find("a") is not None else None
             url = f"{page_url}{url}" if url is not None else None
             self.events.append(Event(
                 source_url=self.source_url,
@@ -197,21 +179,21 @@ class NewsChecker(Checker):
         return self.events
 
 class YouTubeChecker(Checker):
-    def __init__(self, source_url, source_type):
-        super().__init__(source_url, source_type)
+    def __init__(self, source_url):
+        super().__init__(source_url, "youtube")
     
     def check(self):
         soup = self.get_soup("xml")
-        entries = self.find_all(soup, "entry")
+        entries = soup.find_all("entry")
         for entry in entries:
             
-            author = self.find(entry, "author") if self.find(entry, "author") is not None else None
-            poster = self.find(author, "name").get_text(strip=True) if self.find(author, "name") is not None else None
+            author = entry.find("author") if entry.find("author") is not None else None
+            poster = entry.find(author, "name").get_text(strip=True) if entry.find(author, "name") is not None else None
 
-            title = self.find(entry, "title").get_text(strip=True) if self.find(entry, "title") is not None else None
-            start = self.find(entry, "published").get_text() if self.find(entry, "published") is not None else None
+            title = entry.find("title").get_text(strip=True) if entry.find("title") is not None else None
+            start = entry.find("published").get_text() if entry.find("published") is not None else None
 
-            youtube_id = self.find(entry, "yt:videoId") if self.find(entry, "yt:videoId") is not None else None
+            youtube_id = entry.find("yt:videoId") if entry.find("yt:videoId") is not None else None
             url = f"http://youtu.be/{youtube_id.get_text()}" if youtube_id is not None else None
             
             self.events.append(Event(
@@ -222,14 +204,57 @@ class YouTubeChecker(Checker):
                 start=start,
                 url=url
             ))
-        return
 
     def get_events(self):
         return self.events
 
-youtube = YouTubeChecker("https://www.youtube.com/feeds/videos.xml?channel_id=UCijMqBPttHFTv7O_mhhsjjg", "youtube")
-youtube.check()
-events = youtube.get_events()
+class ListservChecker(Checker):
+    def __init__(self, source_url):
+        super().__init__(source_url, "listserv")
+    
+    def check(self):
+        soup = self.get_soup()
+        email_url = self.get_email_url(soup, self.source_url)
+        if email_url is None:
+            return None
+        soup = self.get_soup(url=email_url)
+
+        page_url = email_url[:email_url.rfind("/")+1]
+        emails = soup.find_all("ul")[1]
+        items = emails.find_all("li", recursive=False)
+        authors = []
+        subjects = []
+        for item in items:
+            authors.extend(item.find_all("i"))
+            subjects.extend(item.find_all("a", href=True))
+        for author, subject in zip(authors, subjects):
+            poster = author.get_text(strip=True)
+            title = subject.get_text(strip=True)
+            html = subject.get('href')
+            url = f"{page_url}{html}"
+            self.events.append(Event(
+                source_url=self.source_url,
+                source_type=self.source_type,
+                poster=poster,
+                title=title,
+                url=url
+            ))
+
+    def get_email_url(self, soup, url):
+        table = soup.find('table')
+        if (len(table.find_all('tr'))) <= 1:
+            return None
+
+        row = table.find_all('tr')[1]
+        email_url = f"{url}{row.find('a').get('href')}"
+        return email_url
+    
+    def get_events(self):
+        return self.events
+
+listserv = ListservChecker("https://lists.ucmerced.edu/pipermail/uctk/")
+listserv.check()
+events = listserv.get_events()
 for event in events[:10]:
     output = ""
     output += f"{event.poster}, " if event.poster is not None else ""
