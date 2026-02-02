@@ -68,6 +68,11 @@ class Checker():
             return soup.find_all(check)
         return None
 
+    def find_all_class(self, soup, check):
+        if soup.find_all(class_=check):
+            return soup.find_all(class_=check)
+        return None
+
 class CalendarChecker(Checker):
     def __init__(self, source_url, source_type):
         super().__init__(source_url, source_type)
@@ -129,7 +134,7 @@ class ICSChecker(Checker):
     def check(self):
         r = self.get_request()
         cal = Calendar.from_ical(r.text)
-        with open("test1.txt", "wb") as f:
+        with open("test3.txt", "wb") as f:
             f.write(cal.to_ical())
         for event in cal.walk("VEVENT"):
             poster = event.get("ORGANIZER")
@@ -165,9 +170,66 @@ class ICSChecker(Checker):
     def get_events(self):
         return self.events
 
-calendar = ICSChecker("https://calendar.google.com/calendar/ical/k5ap91ke2o77bs6uio2fc3l2ss%40group.calendar.google.com/public/basic.ics", "ics")
-calendar.check()
-events = calendar.get_events()
+class NewsChecker(Checker):
+    def __init__(self, source_url, source_type):
+        super().__init__(source_url, source_type)
+    
+    def check(self):
+        soup = self.get_soup("html.parser")
+        page_url = self.source_url[:self.source_url.rfind("/")]
+        contents = self.find_class(soup, "view-content")
+        events = self.find_all_class(contents, "views-row")
+        for event in events[:1]:
+            title = self.find(event, "a").get_text(strip=True) if self.find(event, "a") is not None else None
+            start = self.find_class(event, "date-display-single").get("content") if self.find_class(event, "date-display-single") is not None else None
+            url = self.find(event, "a").get("href") if self.find(event, "a") is not None else None
+            url = f"{page_url}{url}" if url is not None else None
+            self.events.append(Event(
+                source_url=self.source_url,
+                source_type=self.source_type,
+                title=title,
+                start=start,
+                url=url
+            ))
+        
+        
+    def get_events(self):
+        return self.events
+
+class YouTubeChecker(Checker):
+    def __init__(self, source_url, source_type):
+        super().__init__(source_url, source_type)
+    
+    def check(self):
+        soup = self.get_soup("xml")
+        entries = self.find_all(soup, "entry")
+        for entry in entries:
+            
+            author = self.find(entry, "author") if self.find(entry, "author") is not None else None
+            poster = self.find(author, "name").get_text(strip=True) if self.find(author, "name") is not None else None
+
+            title = self.find(entry, "title").get_text(strip=True) if self.find(entry, "title") is not None else None
+            start = self.find(entry, "published").get_text() if self.find(entry, "published") is not None else None
+
+            youtube_id = self.find(entry, "yt:videoId") if self.find(entry, "yt:videoId") is not None else None
+            url = f"http://youtu.be/{youtube_id.get_text()}" if youtube_id is not None else None
+            
+            self.events.append(Event(
+                source_url=self.source_url,
+                source_type=self.source_type,
+                poster=poster,
+                title=title,
+                start=start,
+                url=url
+            ))
+        return
+
+    def get_events(self):
+        return self.events
+
+youtube = YouTubeChecker("https://www.youtube.com/feeds/videos.xml?channel_id=UCijMqBPttHFTv7O_mhhsjjg", "youtube")
+youtube.check()
+events = youtube.get_events()
 for event in events[:10]:
     output = ""
     output += f"{event.poster}, " if event.poster is not None else ""
@@ -175,5 +237,5 @@ for event in events[:10]:
     output += f"{event.start}, " if event.start is not None else ""
     output += f"{event.end}, " if event.end is not None else ""
     output += f"{event.building}, " if event.building is not None else ""
-    output += f"{event.url}, " if event.url is not None else ""
+    output += f"{event.url} " if event.url is not None else ""
     print(output)
