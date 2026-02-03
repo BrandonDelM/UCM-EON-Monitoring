@@ -32,18 +32,3 @@ class SportsChecker(Checker):
                 start=start,
                 url=url
             ))
-    
-sports = SportsChecker("hello")
-sports.check()
-events = sports.get_events()
-for event in events:
-    fields = [
-        event.poster,
-        event.title,
-        event.start,
-        event.end,
-        event.building,
-        event.url
-    ]
-    output = ", ".join(str(item) for item in fields if item)
-    print(output)

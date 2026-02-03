@@ -50,10 +50,10 @@ class Checker():
         soup = BeautifulSoup(r.text, features=features)
         return soup
 
-    def get_request(self, url=None):
+    def get_request(self, url=None, headers=None):
         if url is None:
             url = self.source_url
-        return requests.get(url)
+        return requests.get(url, headers)
     
     def get_events(self):
         return self.events
