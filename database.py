@@ -35,11 +35,19 @@ def add_to_database():
         .execute()
     )
 
+def delete_specific_rows(url):
+    response: dict = (
+        supabase.table("events")
+        .delete()
+        .eq("source_url", url)
+        .execute()
+    )
+
 def check_database_for_changes(url, updates):
     response: dict = (
         supabase.table("events")
         .select("source_url")
-        .eq(url)
+        .eq("source_url", url)
         .execute()
     )
 

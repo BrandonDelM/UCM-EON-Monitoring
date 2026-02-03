@@ -42,15 +42,15 @@ class ListservChecker(Checker):
         return email_url
     
 
-listserv = ListservChecker("https://lists.ucmerced.edu/pipermail/uctk/")
-listserv.check()
-events = listserv.get_events()
-for event in events[:10]:
-    output = ""
-    output += f"{event.poster}, " if event.poster is not None else ""
-    output += f"{event.title}, " if event.title is not None else ""
-    output += f"{event.start}, " if event.start is not None else ""
-    output += f"{event.end}, " if event.end is not None else ""
-    output += f"{event.building}, " if event.building is not None else ""
-    output += f"{event.url} " if event.url is not None else ""
-    print(output)
+# listserv = ListservChecker("https://lists.ucmerced.edu/pipermail/uctk/")
+# listserv.check()
+# events = listserv.get_events()
+# for event in events[:10]:
+#     output = ""
+#     output += f"{event.poster}, " if event.poster is not None else ""
+#     output += f"{event.title}, " if event.title is not None else ""
+#     output += f"{event.start}, " if event.start is not None else ""
+#     output += f"{event.end}, " if event.end is not None else ""
+#     output += f"{event.building}, " if event.building is not None else ""
+#     output += f"{event.url} " if event.url is not None else ""
+#     print(output)

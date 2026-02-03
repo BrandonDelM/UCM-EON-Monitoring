@@ -83,18 +83,18 @@ class AaiscloudChecker(Checker):
                 url=url
             ))
 
-aaiscloud = AaiscloudChecker("hello")
-aaiscloud.check()
-events = aaiscloud.get_events()
-for event in events:
-    fields = [
-        event.poster,
-        event.title,
-        event.start,
-        event.end,
-        event.building,
-        event.url
-    ]
-    output = ", ".join(str(item) for item in fields if item)
+# aaiscloud = AaiscloudChecker("hello")
+# aaiscloud.check()
+# events = aaiscloud.get_events()
+# for event in events:
+#     fields = [
+#         event.poster,
+#         event.title,
+#         event.start,
+#         event.end,
+#         event.building,
+#         event.url
+#     ]
+#     output = ", ".join(str(item) for item in fields if item)
 
-    print(output)
+#     print(output)

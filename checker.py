@@ -36,24 +36,37 @@ class Event():
         self.url = url
         pass
 
+    def __eq__(self, other):
+        if not isinstance(other, Event):
+            return False
+        return (self.poster == other.poster and
+                self.title == other.title and
+                self.start == other.start and
+                self.end == other.end and
+                self.building == other.building and
+                self.url == other.url)
+
 
 class Checker():
     def __init__(self, source_url, source_type):
         self.source_url: str = source_url
         self.source_type: str = source_type
-        self.events: list = []
+        self.events: list[Event] = []
     
-    def get_soup(self, url=None, features="html.parser"):
+    def get_soup(self, url: str | None = None, features: str ="html.parser"):
         if url is None:
             url = self.source_url
         r = self.get_request(url)
         soup = BeautifulSoup(r.text, features=features)
         return soup
 
-    def get_request(self, url=None, headers=None):
+    def get_request(self, url: str | None = None, headers: str | None = None):
         if url is None:
             url = self.source_url
         return requests.get(url, headers)
     
     def get_events(self):
         return self.events
+    
+    def is_change(self, table):
+        pass
