@@ -32,18 +32,19 @@ def create_checker(source_type, source_url):
         case "youtube":
             return YouTubeChecker(source_url)
 
+CHECKER = AaiscloudChecker | BlueskyChecker | CalendarChecker | ICSChecker | ListservChecker | NewsChecker | RSSChecker | SportsChecker | YouTubeChecker
+
 class Automation():
     def __init__(self, checker):
-        self.checker: AaiscloudChecker | BlueskyChecker | CalendarChecker | ICSChecker | ListservChecker | NewsChecker | RSSChecker | SportsChecker | YouTubeChecker = checker
+        self.checker: CHECKER = checker
     
     async def automate(self):
         while(True):
             print(f"Checking {self.checker.source_type} {self.checker.source_url}")
             self.checker.clear_events()
-            check = await self.checker.check()
-            if check is None:
-                return
-            self.log_changes()
+            self.checker.check()
+            if self.checker.get_events():
+                self.log_changes()
             await asyncio.sleep(1800)
 
     def log_changes(self):
