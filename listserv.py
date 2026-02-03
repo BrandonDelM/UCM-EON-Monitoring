@@ -41,9 +41,6 @@ class ListservChecker(Checker):
         email_url = f"{url}{row.find('a').get('href')}"
         return email_url
     
-    def get_events(self):
-        return self.events
-    
 
 listserv = ListservChecker("https://lists.ucmerced.edu/pipermail/uctk/")
 listserv.check()

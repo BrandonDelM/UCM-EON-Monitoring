@@ -21,6 +21,3 @@ class CalendarChecker(Checker):
         for title, date, url in zip(titles, dates, urls):
             event = Event(self.source_url, self.source_type, title=title.get_text(strip=True), start=date.get_text(strip=True), url=url)
             self.events.append(event)
-    
-    def get_events(self):
-        return self.events

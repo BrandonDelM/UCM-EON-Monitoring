@@ -22,6 +22,3 @@ class NewsChecker(Checker):
                 url=url
             ))
         
-        
-    def get_events(self):
-        return self.events

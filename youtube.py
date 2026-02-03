@@ -26,6 +26,3 @@ class YouTubeChecker(Checker):
                 start=start,
                 url=url
             ))
-
-    def get_events(self):
-        return self.events

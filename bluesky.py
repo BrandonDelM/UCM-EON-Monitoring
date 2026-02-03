@@ -60,9 +60,6 @@ class BlueskyChecker(Checker):
                 start=start,
                 url=url
             ))
-    
-    def get_events(self):
-        return self.events
 
 # bluesky = BlueskyChecker("https://bsky.app/profile/starringon.bsky.social/feed/aaajx5bhjuexc")
 # bluesky.check()

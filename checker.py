@@ -54,3 +54,6 @@ class Checker():
         if url is None:
             url = self.source_url
         return requests.get(url)
+    
+    def get_events(self):
+        return self.events
