@@ -4,8 +4,10 @@ class RSSChecker(Checker):
     def __init__(self, source_url):
         super().__init__(source_url, "rss")
     
-    def check(self):
-        soup = self.get_soup(features="xml")
+    async def check(self):
+        soup = await self.get_soup(features="xml")
+        if soup is None:
+            return
         items = soup.find_all('item')
         for item in items:
             poster = item.find("dc:creator").get_text(strip=True) if item.find("dc:creator") is not None else None

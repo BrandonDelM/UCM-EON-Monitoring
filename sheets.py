@@ -21,15 +21,5 @@ def get_worksheet_columns(worksheet: Worksheet):
     rows = data[1:]
 
     urls = [row[0] for row in rows]
-    tables = [row[1] for row in rows]
 
-    return urls, tables
-
-from datetime import date
-def update_worksheet_logs(worksheet, updates, url):
-    if len(updates) != 0:
-        update_log = f"{date.today()}: New updates for {url}\n"
-        for update in updates:
-            update_log += f"{update}\n"
-        update_log = update_log[:49000]
-        worksheet.append_row([update_log])
+    return urls

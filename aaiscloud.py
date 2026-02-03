@@ -57,7 +57,7 @@ class AaiscloudChecker(Checker):
         super().__init__(source_url, "aaiscloud")
         self.session = requests.Session()
     
-    def check(self):
+    async def check(self):
         url = build_aaiscloud_calendar_url(days=1)
         headers = get_aaiscloud_headers()
         response = self.session.get(url=url, headers=headers)

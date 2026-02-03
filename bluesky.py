@@ -37,7 +37,7 @@ class BlueskyChecker(Checker):
     def __init__(self, source_url):
         super().__init__(source_url, "bluesky")
     
-    def check(self):
+    async def check(self):
         client: Client = init_bluesky_client()
         data = get_bluesky_feed(client)
         feed = data.feed

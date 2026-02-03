@@ -9,6 +9,7 @@ from sports import SportsChecker
 from youtube import YouTubeChecker
 from checker import Event
 import asyncio
+from database import *
 
 def create_checker(source_type, source_url):
     match(source_type):
@@ -32,18 +33,21 @@ def create_checker(source_type, source_url):
             return YouTubeChecker(source_url)
 
 class Automation():
-    def __init__(self, checker, table):
+    def __init__(self, checker):
         self.checker: AaiscloudChecker | BlueskyChecker | CalendarChecker | ICSChecker | ListservChecker | NewsChecker | RSSChecker | SportsChecker | YouTubeChecker = checker
     
-    def automate(self):
+    async def automate(self):
         while(True):
-            self.checker.check()
-            events: list[Event] = self.checker.get_events()
-            self.log_changes(events)
-            asyncio.sleep(1800)
+            print(f"Checking {self.checker.source_type} {self.checker.source_url}")
+            self.checker.clear_events()
+            check = await self.checker.check()
+            if check is None:
+                return
+            self.log_changes()
+            await asyncio.sleep(1800)
 
     def log_changes(self):
-        # Clear table
-        # Add all events to the postgres table
-        table = "events"
-        pass
+        # Clear table for the new events
+        delete_specific_rows(self.checker.get_source_url())
+        # Add the rows to database
+        add_to_database(self.checker.get_events(), self.checker.get_source_url(), self.checker.get_source_type())

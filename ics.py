@@ -5,13 +5,13 @@ class ICSChecker(Checker):
     def __init__(self, source_url):
         super().__init__(source_url, "ics")
     
-    def check(self):
-        r = self.get_request()
+    async def check(self):
+        r = await self.get_request()
         cal = Calendar.from_ical(r.text)
         for event in cal.walk("VEVENT"):
             poster = event.get("ORGANIZER")
 
-            poster = str(poster).strip() if poster is not None else None
+            poster = str(poster).replace("MAILTO:", "") if poster is not None else None
 
             title = event.get("SUMMARY")
             title = str(title).strip() if title is not None else None

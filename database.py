@@ -1,54 +1,41 @@
 from dotenv import load_dotenv
 from supabase import create_client, Client
+from checker import Checker, Event
 import os
-
-"""
-Source_Url
-Source_Type
-Poster
-Title
-Start
-End
-Building
-URL
-
-"""
 
 load_dotenv()
 url = os.getenv("SUPABASE_URL")
 key = os.getenv("SUPABASE_KEY")
 supabase = create_client(url, key)
 
-def add_to_database():
-    response = (
-        supabase.table("events")
-        .insert({
-            "source_url": "",
-            "source_type": "",
-            "poster": "",
-            "title": "",
-            "start": "",
-            "end": "",
-            "building": "",
-            "url": ""
-        })
-        .execute()
-    )
+def add_to_database(events: list[Event], source_url: str, source_type: str):
+    records = [
+        {
+            "source_url": source_url,
+            "source_type": source_type,
+            "poster": event.get_poster(),
+            "title": event.get_title(),
+            "start": event.get_start(),
+            "end": event.get_end(),
+            "building": event.get_building(),
+            "url": event.get_url()
+        }
+        for event in events
+    ]
+    try:
+        response = (
+            supabase.table("events")
+            .insert(records)
+            .execute()
+        )
+        return f"Added {len(records)} events to database for {source_type} {source_url}"
+    except Exception as e:
+        return f"Error while adding events to table: {e}"
 
-def delete_specific_rows(url):
+def delete_specific_rows(url: str):
     response: dict = (
         supabase.table("events")
         .delete()
         .eq("source_url", url)
         .execute()
     )
-
-def check_database_for_changes(url, updates):
-    response: dict = (
-        supabase.table("events")
-        .select("source_url")
-        .eq("source_url", url)
-        .execute()
-    )
-
-    events = response.get("data")
