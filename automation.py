@@ -41,10 +41,13 @@ class Automation():
     async def automate(self):
         while(True):
             print(f"Checking {self.checker.source_type} {self.checker.source_url}")
-            self.checker.clear_events()
-            self.checker.check()
-            if self.checker.get_events():
-                self.log_changes()
+            try:
+                self.checker.clear_events()
+                await self.checker.check()
+                if self.checker.get_events():
+                    self.log_changes()
+            except Exception as e:
+                print(f"Exception while logging {self.checker.source_url}: {e}")
             await asyncio.sleep(1800)
 
     def log_changes(self):
