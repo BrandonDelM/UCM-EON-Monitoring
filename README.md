@@ -4,5 +4,6 @@
 * Will be used for the API, which will be used on other UC Merced projects and the Discord bot.
 
 ## Todos:
-- News should check in certain circumstances for information inside of a link for date
+- News should check in certain circumstances for information inside of a link for date ✅
+- Listserv should check for the isoformat date ✅
 - Add a more advance query which checks if the database already contains an event.
