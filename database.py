@@ -39,3 +39,7 @@ def delete_specific_rows(url: str):
         .eq("source_url", url)
         .execute()
     )
+
+def is_row_in_table(event: Event):
+    
+    pass

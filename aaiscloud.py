@@ -1,5 +1,5 @@
 from checker import Checker, Event
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urlencode
 from zoneinfo import ZoneInfo
 
@@ -67,8 +67,14 @@ class AaiscloudChecker(Checker):
         for event in data:
             poster = event[17]
             title = event[1]
-            start = event[8]
-            end = event[9]
+            try:
+                start = datetime.fromisoformat(event[8]).astimezone(timezone.utc).isoformat()
+            except Exception as e:
+                start = event[8]
+            try:
+                end = datetime.fromisoformat(event[9]).astimezone(timezone.utc).isoformat()
+            except Exception as e:
+                end = event[9]
             building = event[7]
             id = event[0]
             url  = f"https://www.aaiscloud.com/UCAMerced/~api/hover/geteventcontentforeventmeeting/{id}"
