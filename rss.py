@@ -7,6 +7,7 @@ class RSSChecker(Checker):
     async def check(self):
         soup = await self.get_soup(features="xml")
         if soup is None:
+            print(f"Soup returned none for {self.source_url}")
             return
         items = soup.find_all('item')
         for item in items:

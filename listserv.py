@@ -1,4 +1,5 @@
 from checker import Checker, Event
+from datetime import datetime
 
 class ListservChecker(Checker):
     def __init__(self, source_url):
@@ -27,10 +28,19 @@ class ListservChecker(Checker):
             title = subject.get_text(strip=True)
             html = subject.get('href')
             url = f"{page_url}{html}"
+
+            start = None
+            try:
+                soup = await self.get_soup(url=url)
+                start = self.get_email_date(soup)
+            except Exception as e:
+                print(f"Error while getting date for {self.source_url}: {e}")
+            
             self.events.append(Event(
                 source_url=self.source_url,
                 source_type=self.source_type,
                 poster=poster,
+                start=start,
                 title=title,
                 url=url
             ))
@@ -43,10 +53,20 @@ class ListservChecker(Checker):
         row = table.find_all('tr')[1]
         email_url = f"{url}{row.find('a').get('href')}"
         return email_url
+
+    def get_email_date(self, soup):
+        italic = soup.find('i')
+        if italic is None:
+            return None
+        date = italic.get_text(strip=True)
+        start = datetime.strptime(date, '%a %b %d %H:%M:%S %Z %Y').isoformat()
+        return start
     
 
 # listserv = ListservChecker("https://lists.ucmerced.edu/pipermail/uctk/")
 # import asyncio
+# asyncio.run(listserv.check())
+
 # from sheets import init_sheets_client, get_sheet, get_worksheet_columns
 # client = init_sheets_client()
 # sheet = get_sheet(client, "10JOd0s1Y7q8BqbInpZ15dvomEIz6402KtDUpSj7g7Rk")
