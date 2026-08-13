@@ -47,7 +47,6 @@ class NewsChecker(Checker):
                 country = soup.find(class_='country').get_text(strip=True)
                 location = f"{street}, {address}, {country}" if street and address and country else None
 
-            print(location)
             self.events.append(Event(
                 source_url=self.source_url,
                 source_type=self.source_type,
