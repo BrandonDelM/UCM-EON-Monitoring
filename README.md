@@ -6,4 +6,5 @@
 ## Todos:
 - News should check in certain circumstances for information inside of a link for date ✅
 - Listserv should check for the isoformat date ✅
+- Calendar should check for location information with event link
 - Add a more advance query which checks if the database already contains an event.

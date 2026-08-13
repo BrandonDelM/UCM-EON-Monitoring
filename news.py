@@ -39,12 +39,15 @@ class NewsChecker(Checker):
                 end = soup.find(class_='date-display-end').get('content') if soup.find(class_='date-display-end') else None
 
             location = None
-            if soup.find(class_='field-type-addressfield') is not None:
+            if soup.find(class_='field-name-field-event-location') is not None:
+                location = soup.find(class_='field-name-field-event-location').find(class_='field-item').get_text(strip=True)
+            elif soup.find(class_='field-type-addressfield') is not None:
                 street = soup.find(class_='street-block').get_text(strip=True)
                 address = soup.find(class_='addressfield-container-inline').get_text()
                 country = soup.find(class_='country').get_text(strip=True)
                 location = f"{street}, {address}, {country}" if street and address and country else None
 
+            print(location)
             self.events.append(Event(
                 source_url=self.source_url,
                 source_type=self.source_type,
@@ -54,3 +57,7 @@ class NewsChecker(Checker):
                 building=location,
                 url=url
             ))
+
+# checker = NewsChecker('https://centerforhumanities.ucmerced.edu/events')
+# import asyncio
+# asyncio.run(checker.check())
