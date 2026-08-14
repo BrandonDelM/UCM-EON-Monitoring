@@ -48,19 +48,18 @@ class CalendarChecker(Checker):
                 start = date.find(class_='date-display-single').get('content') if date.find(class_='date-display-single') else None
                 start = self.put_iso_to_utc(start)
 
-            request = requests.get(url, headers=headers)
-            soup = BeautifulSoup(request.text,"html.parser")
+            # request = requests.get(url, headers=headers)
+            # soup = BeautifulSoup(request.text,"html.parser")
 
             location = None
-            if soup.find(class_='field-name-field-event-location') is not None:
-                location = soup.find(class_='field-name-field-event-location').find(class_='field-item').get_text(strip=True)
-            elif soup.find(class_='field-type-addressfield') is not None:
-                street = soup.find(class_='street-block').get_text(strip=True)
-                address = soup.find(class_='addressfield-container-inline').get_text()
-                country = soup.find(class_='country').get_text(strip=True)
-                location = f"{street}, {address}, {country}" if street and address and country else None
+            # if soup.find(class_='field-name-field-event-location') is not None:
+            #     location = soup.find(class_='field-name-field-event-location').find(class_='field-item').get_text(strip=True)
+            # elif soup.find(class_='field-type-addressfield') is not None:
+            #     street = soup.find(class_='street-block').get_text(strip=True)
+            #     address = soup.find(class_='addressfield-container-inline').get_text()
+            #     country = soup.find(class_='country').get_text(strip=True)
+            #     location = f"{street}, {address}, {country}" if street and address and country else None
 
-            print(f"{title.get_text(strip=True)} | {start} | {end} | {location} | {url}")
             event = Event(self.source_url, 
                           self.source_type, 
                           title=title.get_text(strip=True), 
