@@ -8,3 +8,5 @@
 - Listserv should check for the isoformat date ✅
 - Calendar should check for location information with event link
 - Add a more advance query which checks if the database already contains an event.
+- Implementation of Eventbrite into the monitoring system
+- Implementation of Selenium into more complex monitoring (Infoready, etc.)
