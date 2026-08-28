@@ -48,6 +48,7 @@ class CalendarChecker(Checker):
                 start = date.find(class_='date-display-single').get('content') if date.find(class_='date-display-single') else None
                 start = self.put_iso_to_utc(start)
 
+            # I need to fix this to make this less slow because it massively slows down the data scraping
             # request = requests.get(url, headers=headers)
             # soup = BeautifulSoup(request.text,"html.parser")
 
