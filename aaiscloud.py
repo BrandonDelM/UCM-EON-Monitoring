@@ -21,7 +21,8 @@ def build_aaiscloud_calendar_url(days):
             'CanView:strjoin2(" ", " ", " "),'
             'SectionId,EventId,'
             'EventImage:strjoin2(" ", " ", " "),'
-            'ParentActivityId,ParentActivityName'
+            'ParentActivityId,ParentActivityName,'
+            'EventMeetingByActivityId.Event.Customer.Name'
         ),
         'entityProps': '',
         '_s': '1',
@@ -65,7 +66,7 @@ class AaiscloudChecker(Checker):
         data = response_json['data']
 
         for event in data:
-            poster = event[17]
+            poster = event[18]
             title = event[1]
             try:
                 start = datetime.fromisoformat(event[8]).astimezone(timezone.utc).isoformat()
@@ -89,8 +90,19 @@ class AaiscloudChecker(Checker):
                 url=url
             ))
 
+
+# url = build_aaiscloud_calendar_url(days=1)
+# print(url)
+# headers = get_aaiscloud_headers()
+# response = requests.get(url, headers=headers)
+# response_json = response.json()
+# print(response_json)
+# data = response_json['data']
+# print(data[0])
+
 # aaiscloud = AaiscloudChecker("hello")
-# aaiscloud.check()
+# import asyncio
+# asyncio.run(aaiscloud.check())
 # events = aaiscloud.get_events()
 # for event in events:
 #     fields = [
