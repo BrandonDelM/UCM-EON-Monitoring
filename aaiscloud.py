@@ -22,11 +22,12 @@ def build_aaiscloud_calendar_url(days):
             'SectionId,EventId,'
             'EventImage:strjoin2(" ", " ", " "),'
             'ParentActivityId,ParentActivityName,'
-            'EventMeetingByActivityId.Event.Customer.Name'
+            'EventMeetingByActivityId.Event.Customer.Name,'
+            'EventMeetingByActivityId.Event.EventType.Name'
         ),
         'entityProps': '',
         '_s': '1',
-        'filter': f"(((EventMeetingByActivityId.IsPrivate==0)&&(EventMeetingByActivityId.Event.IsPrivate==0))&&((ActivityTypeCode==2)&&(StartDateTime >= \"{start_date}\" && StartDateTime <= \"{end_date}\")))",
+        'filter': f"(((EventMeetingByActivityId.IsPrivate==0)&&(EventMeetingByActivityId.Event.IsPrivate==0))&&((ActivityTypeCode==2)&&(StartDateTime >= \"{start_date}\" && StartDateTime <= \"{end_date}\"))&&(EventMeetingByActivityId.Event.EventType.Name!=\"Class\"))",
         'sortOrder': '+StartDateTime',
         'page': '1',
         'start': '0',
@@ -91,8 +92,8 @@ class AaiscloudChecker(Checker):
             ))
 
 
-# url = build_aaiscloud_calendar_url(days=1)
-# print(url)
+url = build_aaiscloud_calendar_url(days=1)
+print(url)
 # headers = get_aaiscloud_headers()
 # response = requests.get(url, headers=headers)
 # response_json = response.json()
