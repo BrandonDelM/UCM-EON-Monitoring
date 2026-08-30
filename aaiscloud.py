@@ -1,12 +1,14 @@
 from checker import Checker, Event
 from datetime import datetime, timedelta, timezone
+from dateutil.relativedelta import relativedelta
 from urllib.parse import urlencode
 from zoneinfo import ZoneInfo
 
 def build_aaiscloud_calendar_url(days):
     pst = ZoneInfo("America/Los_Angeles")
     date = datetime.now(pst).replace(hour=0, minute=0, second=0, microsecond=0)
-    end = date + timedelta(days=days)
+    # end = date + timedelta(days=days)
+    end = date + relativedelta(months=1)
     
     start_date = date.strftime("%Y-%m-%dT00:00:00")
     end_date = end.strftime("%Y-%m-%dT23:59:59")
@@ -14,14 +16,8 @@ def build_aaiscloud_calendar_url(days):
     params = {
         'allowUnlimitedResults': 'true',
         'fields': (
-            'ActivityId,ActivityName,StartDate,ActivityTypeCode,CampusName,'
-            'BuildingCode,RoomNumber,LocationName,StartDateTime,EndDateTime,'
-            'InstructorName:strjoin2(" ", " ", " "),'
-            'Days:strjoin2(" ", " ", " "),'
-            'CanView:strjoin2(" ", " ", " "),'
-            'SectionId,EventId,'
-            'EventImage:strjoin2(" ", " ", " "),'
-            'ParentActivityId,ParentActivityName,'
+            'ActivityId,ActivityName,'
+            'LocationName,StartDateTime,EndDateTime,'
             'EventMeetingByActivityId.Event.Customer.Name,'
             'EventMeetingByActivityId.Event.EventType.Name'
         ),
@@ -35,7 +31,7 @@ def build_aaiscloud_calendar_url(days):
         'sort': '[{"property":"StartDateTime","direction":"ASC"}]'
     }
     
-    url = f"https://www.aaiscloud.com/UCAMerced/~api/calendar/activityList?{urlencode(params, safe=':,()\"')}"
+    url = f"https://www.aaiscloud.com/UCAMerced/~api/calendar/calendarList?{urlencode(params, safe=':,()\"')}"
     
     return url
 
@@ -67,17 +63,17 @@ class AaiscloudChecker(Checker):
         data = response_json['data']
 
         for event in data:
-            poster = event[18]
+            poster = event[5]
             title = event[1]
             try:
-                start = datetime.fromisoformat(event[8]).astimezone(timezone.utc).isoformat()
+                start = datetime.fromisoformat(event[3]).astimezone(timezone.utc).isoformat()
             except Exception as e:
-                start = event[8]
+                start = event[3]
             try:
-                end = datetime.fromisoformat(event[9]).astimezone(timezone.utc).isoformat()
+                end = datetime.fromisoformat(event[4]).astimezone(timezone.utc).isoformat()
             except Exception as e:
-                end = event[9]
-            building = event[7]
+                end = event[4]
+            building = event[2]
             id = event[0]
             url  = f"https://www.aaiscloud.com/UCAMerced/~api/hover/geteventcontentforeventmeeting/{id}"
             self.events.append(Event(
@@ -92,8 +88,8 @@ class AaiscloudChecker(Checker):
             ))
 
 
-url = build_aaiscloud_calendar_url(days=1)
-print(url)
+# url = build_aaiscloud_calendar_url(days=1)
+# print(url)
 # headers = get_aaiscloud_headers()
 # response = requests.get(url, headers=headers)
 # response_json = response.json()
@@ -101,19 +97,19 @@ print(url)
 # data = response_json['data']
 # print(data[0])
 
-# aaiscloud = AaiscloudChecker("hello")
-# import asyncio
-# asyncio.run(aaiscloud.check())
-# events = aaiscloud.get_events()
-# for event in events:
-#     fields = [
-#         event.poster,
-#         event.title,
-#         event.start,
-#         event.end,
-#         event.building,
-#         event.url
-#     ]
-#     output = ", ".join(str(item) for item in fields if item)
+aaiscloud = AaiscloudChecker("hello")
+import asyncio
+asyncio.run(aaiscloud.check())
+events = aaiscloud.get_events()
+for event in events:
+    fields = [
+        event.poster,
+        event.title,
+        event.start,
+        event.end,
+        event.building,
+        event.url
+    ]
+    output = ", ".join(str(item) for item in fields if item)
 
-#     print(output)
+    print(output)
