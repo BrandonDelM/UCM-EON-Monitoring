@@ -97,19 +97,19 @@ class AaiscloudChecker(Checker):
 # data = response_json['data']
 # print(data[0])
 
-aaiscloud = AaiscloudChecker("hello")
-import asyncio
-asyncio.run(aaiscloud.check())
-events = aaiscloud.get_events()
-for event in events:
-    fields = [
-        event.poster,
-        event.title,
-        event.start,
-        event.end,
-        event.building,
-        event.url
-    ]
-    output = ", ".join(str(item) for item in fields if item)
+# aaiscloud = AaiscloudChecker("hello")
+# import asyncio
+# asyncio.run(aaiscloud.check())
+# events = aaiscloud.get_events()
+# for event in events:
+#     fields = [
+#         event.poster,
+#         event.title,
+#         event.start,
+#         event.end,
+#         event.building,
+#         event.url
+#     ]
+#     output = ", ".join(str(item) for item in fields if item)
 
-    print(output)
+#     print(output)

@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 class CepChecker(Checker):
-    def __int__(self, source_url):
+    def __init__(self, source_url):
         super().__init__(source_url, "cep")
 
     def put_time_format(self, time):
@@ -60,9 +60,3 @@ class CepChecker(Checker):
                 url=url
             )
             self.events.append(event)
-
-# checker = CepChecker("https://ucmcep.org/api/cep/calendar?dateFrom=1%2F1%2F2026", "cep")
-# import asyncio
-# asyncio.run(checker.check())
-# for event in checker.events:
-#     print(event.title, event.start, event.end, event.building, event.url)

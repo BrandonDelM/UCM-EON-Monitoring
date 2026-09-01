@@ -14,7 +14,6 @@ headers = {
 
 response = requests.get(url, headers=headers)
 
-# print(json.loads(response.text)['links'])
 links = json.loads(response.text)['links']
 for link in links:
     print(link['originalURL'])

@@ -41,5 +41,32 @@ def delete_specific_rows(url: str):
     )
 
 def is_row_in_table(event: Event):
-    
-    pass
+    try:
+        response: dict = (
+                supabase.table("events")
+                .select("*")
+                .eq("title", event.get_title())
+                .eq("start", event.get_start())
+                .eq("building", event.get_building())
+                .execute()
+            )
+        if not response.data:
+            return False
+        return True
+    except Exception as e:
+        print(f"Error while checking event in table: {e}")
+        return False
+
+def delete_specific_event(event: Event):
+    response: dict = (
+        supabase.table("events")
+        .delete()
+        .eq("source_url", event.source_url)
+        .eq("poster", event.poster())
+        .eq("title", event.get_title())
+        .eq("start", event.get_start())
+        .eq("end", event.get_end())
+        .eq("building", event.get_building())
+        .eq("url", event.get_url())
+        .execute()
+    )

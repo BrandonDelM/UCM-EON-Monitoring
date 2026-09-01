@@ -1,6 +1,7 @@
 from aaiscloud import AaiscloudChecker
 from bluesky import BlueskyChecker
 from calendar_checker import CalendarChecker
+from cep import CepChecker
 from ics import ICSChecker
 from listserv import ListservChecker
 from news import NewsChecker
@@ -19,12 +20,16 @@ def create_checker(source_type, source_url):
             return BlueskyChecker(source_url)
         case "calendar":
             return CalendarChecker(source_url)
+        case "cep":
+            return CepChecker(source_url)
         case "ics":
             return ICSChecker(source_url)
         case "listserv":
             return ListservChecker(source_url)
         case "news":
             return NewsChecker(source_url)
+        case "reddit":
+            return YouTubeChecker(source_url)
         case "rss":
             return RSSChecker(source_url)
         case "sports":
@@ -32,7 +37,7 @@ def create_checker(source_type, source_url):
         case "youtube":
             return YouTubeChecker(source_url)
 
-CHECKER = AaiscloudChecker | BlueskyChecker | CalendarChecker | ICSChecker | ListservChecker | NewsChecker | RSSChecker | SportsChecker | YouTubeChecker
+CHECKER = AaiscloudChecker | BlueskyChecker | CalendarChecker | CepChecker | ICSChecker | ListservChecker | NewsChecker | RSSChecker | SportsChecker | YouTubeChecker
 
 class Automation():
     def __init__(self, checker):
